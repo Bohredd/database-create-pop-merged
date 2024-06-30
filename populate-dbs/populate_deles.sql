@@ -1,6 +1,6 @@
 USE banco_deles;
-
--- INSERT INTO Atletas (id, nome, sexo) VALUES (1422, 'Ahn Jin-Soo', 'M');
+    
+INSERT INTO Atletas (id, nome, sexo) VALUES (1422, 'Ahn Jin-Soo', 'M');
 INSERT INTO Times (nome, noc) VALUES ('South Korea', 'KOR');
 INSERT INTO Olimpiadas (jogos, ano, estacao, cidade) VALUES ('1992 Winter', 1992, 'Winter', 'Albertville');
 INSERT INTO Esportes (nome) VALUES ('Cross Country Skiing');

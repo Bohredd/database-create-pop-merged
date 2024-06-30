@@ -2,91 +2,82 @@ CREATE DATABASE banco_merged;
 
 USE banco_merged;
 
+-- atleta + atletas
 CREATE TABLE Atleta (
-    id INT AUTO_INCREMENT,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255),
-    sexo CHAR(1),
-    PRIMARY KEY(id)
+    sexo VARCHAR(10)
 );
 
-CREATE TABLE InscriçãoAtleta (
-    id INT AUTO_INCREMENT,
-    idade INT,
-    peso FLOAT,
-    altura FLOAT,
-    AtletaId INT,
-    PRIMARY KEY(id),
-    FOREIGN KEY (AtletaId) REFERENCES Atleta(id)
+-- time/noc + times
+CREATE TABLE Time (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255),
+    noc VARCHAR(10)
 );
 
-CREATE TABLE CidadeSede (
-    id INT AUTO_INCREMENT,
+-- tipomedalha/medalha
+CREATE TABLE Medalha (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255)
+);  
+
+-- ano
+CREATE TABLE Ano (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ano INT
+);
+
+-- esporte + esportes
+CREATE TABLE Esporte (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255)
+);
+
+-- modalidade + evento
+CREATE TABLE Modalidade (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255),
-    PRIMARY KEY(id)
+    esporteId INT,
+    FOREIGN KEY (esporteId) REFERENCES Esporte(id)
 );
 
 CREATE TABLE Temporada (
-    id INT AUTO_INCREMENT,
-    nome VARCHAR(255),
-    PRIMARY KEY(id) 
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    descricao VARCHAR(255)
 );
 
-CREATE TABLE Ano (
-    id INT AUTO_INCREMENT,
-    ano INT,
-    PRIMARY KEY(id)
+CREATE TABLE CidadeSede (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cidade VARCHAR(255)
 );
 
-CREATE TABLE Olímpiada (
-    id INT AUTO_INCREMENT,
-    AnoId INT,
-    TemporadaId INT,
-    CidadeSedeId INT,
-    FOREIGN KEY (AnoId) REFERENCES Ano(id),
-    FOREIGN KEY (TemporadaId) REFERENCES Temporada(id),
-    FOREIGN KEY (CidadeSedeId) REFERENCES CidadeSede(id),
-    PRIMARY KEY(id) 
+-- jogos + olimpiadas
+CREATE TABLE Olimpiada (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    jogos VARCHAR(255),
+    anoId INT,
+    temporadaId INT,
+    cidadeId INT,
+    FOREIGN KEY (anoId) REFERENCES Ano(id),
+    FOREIGN KEY (temporadaId) REFERENCES Temporada(id),
+    FOREIGN KEY (cidadeId) REFERENCES CidadeSede(id)
 );
 
-CREATE TABLE Medalha (
-    id INT AUTO_INCREMENT,
-    tipo VARCHAR(50),
-    PRIMARY KEY(id) 
-);
-
-CREATE TABLE Esporte (
-    id INT AUTO_INCREMENT,
-    nome VARCHAR(255),
-    PRIMARY KEY(id)
-);
-
-CREATE TABLE Modalidade (
-    id INT AUTO_INCREMENT,
-    nome VARCHAR(255),
-    EsporteId INT,
-    FOREIGN KEY (EsporteId) REFERENCES Esporte(id),
-    PRIMARY KEY(id)
-);
-
-CREATE TABLE Time (
-    id INT,
-    nome VARCHAR(255),
-    sigla VARCHAR(10),
-    PRIMARY KEY(id)
-);
-
-
-CREATE TABLE Participação (
-    id INT AUTO_INCREMENT,
-    InscriçãoAtletaId INT,
-    OlimpíadaId INT,
-    MedalhaId INT,
-    TimeId INT,
-    ModalidadeId INT,
-    FOREIGN KEY (InscriçãoAtletaId) REFERENCES InscriçãoAtleta(id),
-    FOREIGN KEY (OlimpíadaId) REFERENCES Olímpiada(id),
-    FOREIGN KEY (MedalhaId) REFERENCES Medalha(id),
-    FOREIGN KEY (TimeId) REFERENCES Time(id),
-    FOREIGN KEY (ModalidadeId) REFERENCES Modalidade(id),
-    PRIMARY KEY(id)
+-- participacao + participacao
+CREATE TABLE Participacao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    atletaId INT,
+    timeId INT,
+    olimpiadaId INT,
+    modalidadeId INT,
+    medalhaId INT NULL,
+    idade INT,
+    altura FLOAT,
+    peso FLOAT,
+    FOREIGN KEY (atletaId) REFERENCES Atleta(id),
+    FOREIGN KEY (timeId) REFERENCES Time(id),
+    FOREIGN KEY (olimpiadaId) REFERENCES Olimpiada(id),
+    FOREIGN KEY (modalidadeId) REFERENCES Modalidade(id),
+    FOREIGN KEY (medalhaId) REFERENCES Medalha(id)
 );

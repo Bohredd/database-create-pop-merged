@@ -1,33 +1,58 @@
+USE banco_merged;
 
--- coloca os anos no banco mergeado
-INSERT INTO banco_merged.Ano (ano) SELECT ano 
-FROM banco_deles.Olimpiadas UNION
-SELECT ano FROM banco_nosso.Ano ORDER BY ano ASC;
+-- atleta + atletas
+INSERT INTO banco_merged.Atleta (nome, sexo)
+SELECT nome, sexo FROM banco_deles.Atletas
+UNION SELECT nome, sexo FROM banco_nosso.Atleta;
 
--- coloca os atletas no banco mergeado com nome e sexo
-INSERT INTO banco_merged.Atleta (nome, sexo) SELECT nome, sexo FROM banco_deles.Atletas UNION
-SELECT nome, sexo FROM banco_nosso.Atleta WHERE id IS NOT NULL;
+-- time/noc + times
+INSERT INTO banco_merged.Time (nome, noc) 
+SELECT nome, noc FROM banco_deles.Times UNION 
+SELECT Regiao, Anotacao FROM banco_nosso.NOC;
 
--- coloca as temporadas no banco mergeado
-INSERT INTO banco_merged.Temporada (nome) SELECT descricao FROM banco_nosso.Temporada UNION SELECT estacao FROM banco_deles.Olimpiadas;
+-- tipomedalha/medalha
+INSERT INTO banco_merged.Medalha (nome) SELECT nome FROM banco_nosso.TipoMedalha;
 
--- coloca os esportes jogados no banco mergeado
+-- ano
+INSERT INTO banco_merged.Ano (ano) SELECT ano FROM banco_nosso.Ano;
 
-INSERT INTO banco_merged.Esporte (nome) SELECT nome FROM banco_nosso.Esporte UNION SELECT nome FROM banco_deles.Esportes
+-- esporte + esportes
+INSERT INTO banco_merged.Esporte (nome) 
+SELECT nome FROM banco_nosso.Esporte UNION 
+SELECT nome FROM banco_deles.Esportes;
 
+SELECT * FROM banco_merged.Esporte;
 
--- coloca as cidades sedes no banco mergeado
+-- modalidade + evento
+INSERT INTO banco_merged.Modalidade (nome, esporteId)
+SELECT nome, esporte_id 
+FROM banco_deles.Modalidades
+UNION
+SELECT '', Evento.EsporteId
+FROM banco_nosso.Evento
+LEFT JOIN banco_merged.Esporte ON Evento.EsporteId = banco_merged.Esporte.id
+WHERE banco_merged.Esporte.nome IS NULL OR banco_merged.Esporte.nome = '';
 
-INSERT INTO banco_merged.CidadeSede (nome) SELECT cidade FROM banco_deles.Olimpiadas;
--- arrumar isso aqui
--- coloca as participações de atletas no banco mergeado 
+-- temporada
+INSERT INTO banco_merged.Temporada (descricao) 
+SELECT descricao FROM banco_nosso.Temporada UNION
+SELECT estacao FROM banco_deles.Olimpiadas;
 
-INSERT INTO banco_merged.InscriçãoAtleta (idade, peso, altura, AtletaId)
-SELECT idade, peso, altura, id FROM banco_nosso.Atleta;
+-- cidade sede
+INSERT INTO banco_merged.CidadeSede (cidade) 
+SELECT cidade FROM banco_deles.Olimpiadas;
 
--- INSERT INTO banco_merged.InscriçãoAtleta (idade, peso, altura, AtletaId)
--- SELECT idade, peso, altura, a.id AS AtletaId
--- FROM banco_deles.Participacao
--- JOIN banco_deles.Atletas a ON a.id = atleta_id;
+-- jogos + olimpiadas
+-- precisa arrumar esse
+INSERT INTO banco_merged.Olimpiada (jogos, anoId, temporadaId, cidadeId)
+SELECT id AS jogos, AnoId AS anoId, TemporadaId AS temporadaId, 0 AS cidadeId
+FROM banco_nosso.Jogos
+UNION
+SELECT O.jogos, A.id AS anoId, E.id AS temporadaId, C.id AS cidadeId
+FROM banco_deles.Olimpiadas O
+LEFT JOIN Ano A ON O.ano_id = A.id
+LEFT JOIN Temporada E ON O.estacao_id = E.id
+LEFT JOIN Cidade C ON O.cidade_id = C.id;
 
-SELECT COUNT(*) FROM banco_merged.InscriçãoAtleta;
+-- participacao + participacao
+-- fazer esse

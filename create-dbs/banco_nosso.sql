@@ -1,5 +1,5 @@
 CREATE DATABASE banco_nosso;
-nco_nosso;
+USE banco_nosso;
 
 CREATE TABLE Atleta (
     Id INTEGER PRIMARY KEY,
