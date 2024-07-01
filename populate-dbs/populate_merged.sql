@@ -68,6 +68,30 @@ JOIN
 -- participacao + participacao
 -- fazer esse
 
-INSERT INTO banco_merged.Participacao (atletaId, timeId, olimpiadaId, modalidadeId, medalhaId, idade, altura, peso)
-SELECT A.id as atletaId, T.id as timeId, O.id as olimpiadaId, M.id as modalidadeId, Me.id as medalhaId, A.idade, A.altura, A.peso
-FROM banco_deles.Atletas as A
+INSERT INTO banco_merged.Participacao (atletaId, timeId, olimpiadaId, modalidadeId, medalhaId, idade, altura, peso);
+
+INSERT INTO banco_merged.Participacao (atletaId , timeId, olimpiadaId, modalidadeId, medalhaId, idade, altura, peso)
+
+SELECT * FROM banco_deles.Participacao
+UNION
+SELECT
+    P.id AS participacao_id,
+    T.id AS time_id,
+    O.id AS olimpiada_id,
+    M.id AS modalidade_id,
+    Me.id AS medalha_id,
+    A.idade,
+    A.altura,
+    A.peso
+FROM banco_nosso.Participacao P
+LEFT JOIN banco_nosso.Atleta A ON P.atletaId = A.id
+JOIN banco_merged.Time T ON P.timeId = T.id
+JOIN banco_merged.Olimpiada O ON P.olimpiadaId = O.id
+JOIN banco_merged.Modalidade M ON P.modalidadeId = M.id
+LEFT JOIN banco_merged.Medalha Me ON P.medalhaId = Me.nome;
+
+
+
+-- , T.id as timeId, O.id as olimpiadaId, M.id as modalidadeId, Me.id as medalhaId, A.idade, A.altura, A.peso
+
+JOIN banco_merged.Time T;
