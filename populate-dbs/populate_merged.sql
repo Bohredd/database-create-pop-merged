@@ -45,14 +45,24 @@ SELECT cidade FROM banco_deles.Olimpiadas;
 -- jogos + olimpiadas
 -- precisa arrumar esse
 INSERT INTO banco_merged.Olimpiada (jogos, anoId, temporadaId, cidadeId)
-SELECT id AS jogos, AnoId AS anoId, TemporadaId AS temporadaId, 0 AS cidadeId
-FROM banco_nosso.Jogos
+
+SELECT CONCAT(A.ano, ' ', T.descricao) as jogo, A.id as ano, T.id as temporada , C.id as cidade
+FROM banco_merged.Ano A CROSS JOIN banco_merged.Temporada T
+CROSS JOIN banco_merged.CidadeSede C
 UNION
-SELECT O.jogos, A.id AS anoId, E.id AS temporadaId, C.id AS cidadeId
-FROM banco_deles.Olimpiadas O
-LEFT JOIN Ano A ON O.ano_id = A.id
-LEFT JOIN Temporada E ON O.estacao_id = E.id
-LEFT JOIN Cidade C ON O.cidade_id = C.id;
+SELECT 
+    O.jogos, 
+    O.ano, 
+    O.estacao,
+    O.id
+FROM 
+    banco_deles.Olimpiadas O
+JOIN 
+    banco_merged.Ano A ON O.ano = A.ano
+JOIN 
+    banco_merged.Temporada T ON O.estacao = T.descricao
+JOIN 
+    banco_merged.CidadeSede C ON O.cidade = C.cidade;
 
 -- participacao + participacao
 -- fazer esse
