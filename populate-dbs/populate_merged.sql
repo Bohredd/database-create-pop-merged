@@ -44,16 +44,17 @@ SELECT cidade FROM banco_deles.Olimpiadas;
 
 -- jogos + olimpiadas
 -- precisa arrumar esse
-INSERT INTO banco_merged.Olimpiada (jogos, anoId, temporadaId, cidadeId)
 
+INSERT INTO banco_merged.Olimpiada (jogos, anoId, temporadaId, cidadeId)
+-- não está entrandno no insert into
 SELECT CONCAT(A.ano, ' ', T.descricao) as jogo, A.id as ano, T.id as temporada , C.id as cidade
 FROM banco_merged.Ano A CROSS JOIN banco_merged.Temporada T
 CROSS JOIN banco_merged.CidadeSede C
 UNION
 SELECT 
     O.jogos, 
-    O.ano, 
-    O.estacao,
+    O.id, 
+    O.id,
     O.id
 FROM 
     banco_deles.Olimpiadas O
@@ -66,3 +67,7 @@ JOIN
 
 -- participacao + participacao
 -- fazer esse
+
+INSERT INTO banco_merged.Participacao (atletaId, timeId, olimpiadaId, modalidadeId, medalhaId, idade, altura, peso)
+SELECT A.id as atletaId, T.id as timeId, O.id as olimpiadaId, M.id as modalidadeId, Me.id as medalhaId, A.idade, A.altura, A.peso
+FROM banco_deles.Atletas as A
