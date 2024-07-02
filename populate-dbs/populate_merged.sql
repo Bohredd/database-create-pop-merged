@@ -43,20 +43,17 @@ INSERT INTO banco_merged.CidadeSede (cidade)
 SELECT cidade FROM banco_deles.Olimpiadas;
 
 -- jogos + olimpiadas
--- precisa arrumar esse
-
 INSERT INTO banco_merged.Olimpiada (jogos, anoId, temporadaId, cidadeId)
--- não está entrandno no insert into
--- verificar por que reclama no cannot update or add a child row
 SELECT CONCAT(A.ano, ' ', T.descricao) as jogo, A.id as ano, T.id as temporada , C.id as cidade
-FROM banco_merged.Ano A CROSS JOIN banco_merged.Temporada T
+FROM banco_merged.Ano A 
+CROSS JOIN banco_merged.Temporada T
 CROSS JOIN banco_merged.CidadeSede C
 UNION
 SELECT 
     O.jogos, 
-    O.id, 
-    O.id,
-    O.id
+    A.id as anoId, 
+    T.id as temporadaId, 
+    C.id as cidadeId
 FROM 
     banco_deles.Olimpiadas O
 JOIN 
@@ -65,6 +62,7 @@ JOIN
     banco_merged.Temporada T ON O.estacao = T.descricao
 JOIN 
     banco_merged.CidadeSede C ON O.cidade = C.cidade;
+
 
 -- participacao + participacao
 -- fazer esse
@@ -93,8 +91,3 @@ JOIN banco_merged.Olimpiada O ON P.olimpiadaId = O.id
 JOIN banco_merged.Modalidade M ON P.modalidadeId = M.id
 LEFT JOIN banco_merged.Medalha Me ON P.medalhaId = Me.nome;
 
-
-
--- , T.id as timeId, O.id as olimpiadaId, M.id as modalidadeId, Me.id as medalhaId, A.idade, A.altura, A.peso
-
-JOIN banco_merged.Time T;
