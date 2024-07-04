@@ -21,8 +21,6 @@ INSERT INTO banco_merged.Esporte (nome)
 SELECT nome FROM banco_nosso.Esporte UNION 
 SELECT nome FROM banco_deles.Esportes;
 
-SELECT * FROM banco_merged.Esporte;
-
 -- modalidade + evento
 INSERT INTO banco_merged.Modalidade (nome, esporteId)
 SELECT nome, esporte_id 
@@ -65,10 +63,12 @@ JOIN
 
 
 -- participacao + participacao
--- fazer esse
+
+INSERT INTO banco_merged.Participacao (id, atletaId, timeId, olimpiadad, modalidaded, medalhad, idade, altura, peso)
 
 SELECT
     id,
+    atleta_id,
     time_id,
     olimpiada_id,
     modalidade_id,
@@ -78,7 +78,8 @@ SELECT
     peso
 FROM (
     SELECT
-        P.Id,
+        P.Id AS id,
+        P.AtletaId AS atleta_id,
         P.TimeId AS time_id,
         P.JogosId AS olimpiada_id,
         P.EsporteId AS modalidade_id,
@@ -88,56 +89,20 @@ FROM (
         A.peso
     FROM banco_nosso.Participacao P
     JOIN banco_nosso.Atleta A ON P.AtletaId = A.Id
-    LEFT JOIN banco_merged.Medalha M ON P.MedalhaId = M.id
+    LEFT JOIN banco_merged.Medalha M ON P.MedalhaId = M.id) AS ParticipacaoMesclada;
     UNION
+    
     SELECT
         P.id,
+        P.atleta_id,
         P.time_id,
         P.olimpiada_id,
         P.modalidade_id,
-        (SELECT id FROM banco_merged.Medalha WHERE nome = P.medalha) AS medalha_id,
-        NULL AS idade,
-        NULL AS altura,
-        NULL AS peso
-    FROM banco_deles.Participacao P
-) AS ParticipacaoMesclada;
-
-SELECT COUNT(*) FROM banco_deles.Participacao;
-SELECT COUNT(*) FROM banco_nosso.Participacao;
-
-INSERT INTO banco_merged.Participacao (atletaId, timeId, olimpiadaId, modalidadeId, medalhaId, idade, altura, peso)
-SELECT
-    AtletaId,
-    time_id,
-    olimpiada_id,
-    modalidade_id,
-    medalha_id,
-    idade,
-    altura,
-    peso
-FROM (
-    SELECT
-        P.Id AS participacao_id,
-        P.TimeId AS time_id,
-        P.JogosId AS olimpiada_id,
-        P.EsporteId AS modalidade_id,
-        M.id AS medalha_id,
+        (SELECT id FROM banco_merged.Medalha WHERE nome = COALESCE(P.medalha, "Nenhuma", NULL)) AS medalha_id,
         A.idade,
         A.altura,
         A.peso
-    FROM banco_nosso.Participacao P
-    JOIN banco_nosso.Atleta A ON P.AtletaId = A.Id
-    LEFT JOIN banco_merged.Medalha M ON P.MedalhaId = M.id
-    UNION
-    SELECT
-        P.id AS participacao_id,
-        P.time_id,
-        P.olimpiada_id,
-        P.modalidade_id,
-        (SELECT id FROM banco_merged.Medalha WHERE nome = P.medalha) AS medalha_id,
-        NULL AS idade,
-        NULL AS altura,
-        NULL AS peso
     FROM banco_deles.Participacao P
-) AS UnionedParticipacao;
+    LEFT JOIN banco_nosso.Atleta A ON P.atleta_id = A.Id
+) AS ParticipacaoMesclada;
 
