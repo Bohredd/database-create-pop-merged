@@ -61,48 +61,187 @@ JOIN
 JOIN 
     banco_merged.CidadeSede C ON O.cidade = C.cidade;
 
-
 -- participacao + participacao
 
-INSERT INTO banco_merged.Participacao (id, atletaId, timeId, olimpiadad, modalidaded, medalhad, idade, altura, peso)
+-- SELECT 
+--     mA.id 
+--     FROM banco_merged.Atleta mA
+--     JOIN banco_deles.Atletas dA
+--     ON mA.nome = dA.nome;
 
-SELECT
-    id,
-    atleta_id,
-    time_id,
-    olimpiada_id,
-    modalidade_id,
-    medalha_id,
-    idade,
-    altura,
-    peso
-FROM (
-    SELECT
-        P.Id AS id,
-        P.AtletaId AS atleta_id,
-        P.TimeId AS time_id,
-        P.JogosId AS olimpiada_id,
-        P.EsporteId AS modalidade_id,
-        M.id AS medalha_id,
-        A.idade,
-        A.altura,
-        A.peso
-    FROM banco_nosso.Participacao P
-    JOIN banco_nosso.Atleta A ON P.AtletaId = A.Id
-    LEFT JOIN banco_merged.Medalha M ON P.MedalhaId = M.id) AS ParticipacaoMesclada;
-    UNION
+-- SELECT 
+--     mT.id,
+--     mT.nome
+--     FROM banco_merged.Time mT
+--     JOIN banco_deles.Times dT
+--     ON dT.noc = mT.noc;
+
+-- SELECT 
+--     mO.id
+--     FROM banco_merged.Olimpiada mO
+--     JOIN banco_deles.Olimpiadas dO
+--     ON dO.jogos = mO.jogos;
+
+-- SELECT 
+--     mM.id
+--     FROM banco_merged.Modalidade mM
+--     JOIN banco_deles.Modalidades dM
+--     ON mM.nome = dM.nome;
+
+-- SELECT DISTINCT
+--     dParticip.idade,
+--     dParticip.altura,
+--     dParticip.peso
+-- FROM banco_deles.Participacao dParticip
+-- JOIN banco_deles.Atletas dAtleta ON dParticip.atleta_id = dAtleta.id
+-- JOIN banco_merged.Atleta mA ON mA.nome = dAtleta.nome;
+
+-- SELECT
+--     CASE
+--         WHEN dParticip.medalha IS NULL THEN 4
+--         WHEN dParticip.medalha = 'gold' THEN 1
+--         WHEN dParticip.medalha = 'silver' THEN 2
+--         WHEN dParticip.medalha = 'bronze' THEN 3
+--         ELSE dParticip.medalha
+--     END AS medalha_convertida
+-- FROM banco_deles.Participacao dParticip;
+
+-- TRUNCATE TABLE banco_merged.Participacao;
+
+-- participacao deles com o banco merged
+
+INSERT INTO banco_merged.Participacao (idade, altura, peso, atletaId, timeId, olimpiadaId, modalidadeId, medalhaId)
+SELECT 
+    dParticip.idade,
+    dParticip.altura,
+    dParticip.peso,
+    (
+        SELECT mA.id
+        FROM banco_merged.Atleta mA
+        WHERE mA.nome = dAtleta.nome
+        LIMIT 1
+    ) AS atletaId,
+    (
+        SELECT mT.id
+        FROM banco_merged.Time mT
+        JOIN banco_deles.Times dT ON dT.noc = mT.noc
+        WHERE dT.id = dParticip.time_id
+        LIMIT 1
+    ) AS timeId,
+    (
+        SELECT mO.id
+        FROM banco_merged.Olimpiada mO
+        JOIN banco_deles.Olimpiadas dO ON dO.jogos = mO.jogos
+        WHERE dO.id = dParticip.olimpiada_id
+        LIMIT 1
+    ) AS olimpiadaId,
+    (
+        SELECT mM.id
+        FROM banco_merged.Modalidade mM
+        JOIN banco_deles.Modalidades dM ON dM.nome = mM.nome
+        WHERE dM.id = dParticip.modalidade_id
+        LIMIT 1
+    ) AS modalidadeId,
+    CASE
+        WHEN dParticip.medalha IS NULL THEN 4
+        WHEN dParticip.medalha = 'gold' THEN 1
+        WHEN dParticip.medalha = 'silver' THEN 2
+        WHEN dParticip.medalha = 'bronze' THEN 3
+        ELSE dParticip.medalha
+    END AS medalhaId
+FROM banco_deles.Participacao dParticip
+LEFT JOIN banco_deles.Atletas dAtleta ON dParticip.atleta_id = dAtleta.id;
+
+-- banco nosso participacao mesclado
+
+-- -- atleta id
+
+-- SELECT 
+--     mA.id as atletaId
+--     FROM banco_nosso.Atleta nA
+--     JOIN banco_merged.Atleta mA
+--     ON mA.nome = nA.nome;
+
+-- -- time id
+-- SELECT DISTINCT
+--     CASE 
+--         WHEN nT.id = 2 THEN 1
+--         ELSE nT.id
+--     END AS timeId
+-- FROM banco_nosso.Time nT
+-- JOIN banco_nosso.NOC noc ON nT.NOCId = noc.Id;
+
+-- -- olimpiada id 
+-- SELECT DISTINCT
+--     mergedOlimpiada.id
+--     FROM banco_merged.Olimpiada mergedOlimpiada
+--     JOIN banco_nosso.Jogos nossosJogos
+--     ON mergedOlimpiada.jogos = CONCAT(
+--         (SELECT ano 
+--         FROM banco_nosso.Ano anoNosso 
+--         WHERE nossosJogos.AnoId = anoNosso.id)
+--         , ' ',
+--         (SELECT descricao
+--         FROM banco_nosso.Temporada temporadaNossa
+--         WHERE temporadaNossa.id = nossosJogos.TemporadaId)
+--     )
+
+-- -- idade peso e altura
+-- SELECT
+--     nA.idade,
+--     nA.altura,
+--     nA.peso
+--     FROM banco_nosso.Atleta nA
+--     JOIN banco_merged.Atleta mA
+--     ON mA.nome = nA.nome;
+
+-- -- medalha mergeada
+-- SELECT
+--     MedalhaId
+--     FROM banco_nosso.Participacao nossaParticip
+--     JOIN banco_merged.Medalha medalhaMerged
+--     ON medalhaMerged.Id = nossaParticip.MedalhaId;
     
-    SELECT
-        P.id,
-        P.atleta_id,
-        P.time_id,
-        P.olimpiada_id,
-        P.modalidade_id,
-        (SELECT id FROM banco_merged.Medalha WHERE nome = COALESCE(P.medalha, "Nenhuma", NULL)) AS medalha_id,
-        A.idade,
-        A.altura,
-        A.peso
-    FROM banco_deles.Participacao P
-    LEFT JOIN banco_nosso.Atleta A ON P.atleta_id = A.Id
-) AS ParticipacaoMesclada;
+--------------- insert usando as subconsultas
 
+INSERT INTO banco_merged.Participacao (idade, altura, peso, atletaId, timeId, olimpiadaId, modalidadeId, medalhaId)
+SELECT 
+    dParticip.idade,
+    dParticip.altura,
+    dParticip.peso,
+    (
+        SELECT mA.id
+        FROM banco_merged.Atleta mA
+        WHERE mA.nome = dAtleta.nome
+        LIMIT 1
+    ) AS atletaId,
+    (
+        SELECT mT.id
+        FROM banco_merged.Time mT
+        JOIN banco_deles.Times dT ON dT.noc = mT.noc
+        WHERE dT.id = dParticip.time_id
+        LIMIT 1
+    ) AS timeId,
+    (
+        SELECT mO.id
+        FROM banco_merged.Olimpiada mO
+        JOIN banco_deles.Olimpiadas dO ON dO.jogos = mO.jogos
+        WHERE dO.id = dParticip.olimpiada_id
+        LIMIT 1
+    ) AS olimpiadaId,
+    (
+        SELECT mM.id
+        FROM banco_merged.Modalidade mM
+        JOIN banco_deles.Modalidades dM ON dM.nome = mM.nome
+        WHERE dM.id = dParticip.modalidade_id
+        LIMIT 1
+    ) AS modalidadeId,
+    CASE
+        WHEN dParticip.medalha IS NULL THEN 4
+        WHEN dParticip.medalha = 'gold' THEN 1
+        WHEN dParticip.medalha = 'silver' THEN 2
+        WHEN dParticip.medalha = 'bronze' THEN 3
+        ELSE dParticip.medalha
+    END AS medalhaId
+FROM banco_deles.Participacao dParticip
+LEFT JOIN banco_deles.Atletas dAtleta ON dParticip.atleta_id = dAtleta.id;
